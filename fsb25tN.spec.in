@@ -1,0 +1,48 @@
+Summary:	Fedora Secure Boot 2025 test - @@TESTLOADER@@
+Name:		@@TESTLOADER@@
+Version:	1
+Release:	1
+License:	BSD-3-Clause
+
+ExclusiveArch:	x86_64
+Source0:	@@TESTLOADER@@.efi
+Source1:	install.sh
+
+BuildRequires:	coreutils
+BuildRequires:	efi-filesystem
+
+Requires:	efibootmgr
+Requires:	grub2-efi-x64
+
+%description
+This is to test the bootloader signed with @@TESTLOADER@@
+
+%install
+install -d -m 0755 $RPM_BUILD_ROOT/boot/efi/EFI/%{name}/
+install -m 0700 %{SOURCE0} $RPM_BUILD_ROOT/boot/efi/EFI/%{name}/shimx64.efi
+install -d -m 0755 $RPM_BUILD_ROOT/%{_libexecdir}/%{name}/
+install -m 0755 -t $RPM_BUILD_ROOT/%{_libexecdir}/%{name}/ %{SOURCE1}
+
+%post
+%{_libexecdir}/%{name}/install.sh "%{name}"
+
+%postun
+if [ $1 -eq 0 ] ; then
+    num="$(efibootmgr | grep '[ 	]%{name}[ 	]' | cut -d\  -f1 | cut -dt -f2 | cut '-d*' -f1)"
+
+    if [ -n "${num}" ]; then
+        efibootmgr -b "${num}" -B --quiet
+    fi
+fi
+
+%files
+%dir %attr(0700,root,root) %verify(not mtime) /boot/efi/EFI/%{name}/
+%attr(0700,root,root) %verify(not mtime) /boot/efi/EFI/%{name}/shimx64.efi
+%ghost %attr(0700,root,root) /boot/efi/EFI/%{name}/grubx64.efi
+%ghost %attr(0700,root,root) /boot/efi/EFI/%{name}/grub.cfg
+%dir %attr(0755,root,root) %{_libexecdir}/%{name}
+%attr(0744,root,root) %{_libexecdir}/%{name}/*.sh
+
+%changelog
+* Wed Dec 10 2025 Peter Jones <pjones@redhat.com> - 1-1
+- First attempt

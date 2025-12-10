@@ -1,0 +1,9 @@
+!Fedora-Server-netinst-x86_64-43-1.6.img
+*.img
+*.iso
+*.rpm
+*.spec
+*.sw?
+edk2*/
+shimx64.*.efi
+x86_64/
