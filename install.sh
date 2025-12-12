@@ -58,8 +58,13 @@ main() {
     local device
     device="$(mount | grep " on /boot/efi " | cut -d\  -f1)"
     if [ -z "${num}" ]; then
-        efibootmgr -C -d "${device}" -L "${bootloader}" -l "\\EFI\\BOOT\\shimx64.efi" --quiet
+        efibootmgr -C -d "${device}" -L "${bootloader}" -l "\\EFI\\${bootloader}\\shimx64.efi" --quiet
     fi
+    for x in grubx64.efi grub.cfg grubenv ; do
+        if [ -f "/boot/efi/EFI/fedora/${x}" ]; then
+            cp -a --force "/boot/efi/EFI/fedora/${x}" "/boot/efi/EFI/${bootloader}/"
+        fi
+    done
     num="$(efibootmgr | grep "[ 	]${bootloader}[ 	]" | cut -d\  -f1 | cut -dt -f2 | cut '-d*' -f1)"
     local order
     order="$(efibootmgr | grep BootOrder: | cut -d\  -f2)" || :
